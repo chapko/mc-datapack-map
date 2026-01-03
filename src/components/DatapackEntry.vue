@@ -20,10 +20,8 @@ import { useI18n } from 'vue-i18n';
     const datapack = (props.datapack as Datapack)!
     const image = await datapack.getImage()
     const mcMeta = await datapack.getMcmeta()
-    const rawDescription = mcMeta?.description
-    const formatRange = mcMeta?.formats
-    const supported = computed(() => formatRange ? PackMcmeta.MatchFormatRange(formatRange, versionMetadata[settings.mc_version].datapackFormat) : true)
-    const desciption = TextComponent.parse(rawDescription ?? "")
+    const supported = computed(() => mcMeta !== undefined ? PackMcmeta.MatchFormatRange(mcMeta.formats, versionMetadata[settings.mc_version].datapackFormat) : false)
+    const desciption = TextComponent.parse(mcMeta?.description ?? "")
 
 </script>
 
@@ -31,7 +29,6 @@ import { useI18n } from 'vue-i18n';
     <div class="datapack" :class="{ unsupported: !supported}">
         <img class="image" :src="image" alt="pack.png" />
         <div class="description">
-            {{ formatRange }}
             <MinecraftText :component="desciption" />
         </div>
         <font-awesome-icon v-if="removable" icon="fa-xmark" class="close_button" tabindex="0" :title="i18n.t('datapack_list.remove_datapack.title')" @click="$emit('close')" @keypress.enter="$emit('close')" />
