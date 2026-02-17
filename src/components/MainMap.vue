@@ -23,6 +23,7 @@ const i18n = useI18n()
 
 let biomeLayer: BiomeLayer
 let graticule: Graticule
+let border: L.Rectangle
 
 const tooltip_left = ref(0)
 const tooltip_top = ref(0)
@@ -46,6 +47,7 @@ watch(show_graticule, (value) => {
         map.removeLayer(graticule)
     }
 })
+
 
 var map: L.Map
 var zoom: L.Control.Zoom
@@ -117,9 +119,15 @@ onMounted(() => {
 
     map.addEventListener("contextmenu", async (evt: L.LeafletMouseEvent) => {
         const pos = getPosition(map, evt.latlng)
-        navigator.clipboard.writeText(`/execute in ${settingsStore.dimension.toString()} run tp ${pos[0].toFixed(0)} ${(pos[1] + (project_down.value ? 10 : 0)).toFixed(0)} ${pos[2].toFixed()}`)
-        show_info.value = true
-        setTimeout(() => show_info.value = false, 2000)
+
+        if (evt.originalEvent.shiftKey) {
+            settingsStore.centerX = Math.trunc(pos[0])
+            settingsStore.centerZ = Math.trunc(pos[2])
+        } else {
+            navigator.clipboard.writeText(`/execute in ${settingsStore.dimension.toString()} run tp ${pos[0].toFixed(0)} ${(pos[1] + (project_down.value ? 10 : 0)).toFixed(0)} ${pos[2].toFixed()}`)
+            show_info.value = true
+            setTimeout(() => show_info.value = false, 2000)
+        }
     })
 
 
@@ -128,6 +136,15 @@ onMounted(() => {
     })
 
     graticule = new Graticule()
+
+    border = L.rectangle([[0, 0], [0, 0]], {
+        color: '#ff3333',
+        stroke: true,
+        fill: false,
+        weight: 2
+    })
+
+    watchEffect(updateWorldBorder);
 
     /*
     layer.on("tileunload", (evt) => {
@@ -283,6 +300,24 @@ function updateSpawnMarker(){
         spawnMarker.removeFrom(map)
     }
 
+}
+
+function updateWorldBorder(){
+    const {
+        centerX: x,
+        centerZ: z,
+        borderSize: size
+    } = settingsStore;
+
+    if (size > 0) {
+        border.setBounds([
+            [-z - size, x - size],
+            [-z + size, x + size]
+        ])
+        map.addLayer(border)
+    } else {
+        map.removeLayer(border)
+    }
 }
 
 loadedDimensionStore.$subscribe((mutation, state) => {

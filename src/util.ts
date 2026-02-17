@@ -93,6 +93,18 @@ export function parseSeed(input: string): bigint {
     return BigInt(hash);
 }
 
+export function parseCoord(input: string | number): number {
+	const value = Number(input)
+	if (!Number.isFinite(value)) {
+		return 0;
+	}
+	return Math.trunc(value)
+}
+
+export function parseSize(input: string | number): number {
+	return Math.max(0, parseCoord(input))
+}
+
 export function updateUrlParam(param: string, value?: string, default_value?: string) {
     const uri = window.location.search.substring(1)
     const params = new URLSearchParams(uri)

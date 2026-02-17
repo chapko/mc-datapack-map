@@ -4,13 +4,16 @@ import { computed, ref, watch, watchEffect } from "vue";
 import { useI18n } from "vue-i18n";
 import { useDatapackStore } from "./useDatapackStore.js";
 import { EventTracker } from "../util/EventTracker.js";
-import { parseSeed, updateUrlParam, versionMetadata } from "../util.js";
+import { parseCoord, parseSize, parseSeed, updateUrlParam, versionMetadata } from "../util.js";
 
 export const useSettingsStore = defineStore('settings', () => {
     const defaults = {
         mc_version: "1_21_11",
         world_preset: "minecraft:normal",
         dimension: "minecraft:overworld",
+        center_x: 0,
+        center_z: 0,
+        border_size: 0,
         seed: "0"
     }
 
@@ -30,6 +33,9 @@ export const useSettingsStore = defineStore('settings', () => {
     const mc_version = ref(versionMetadata[params.mc_version] ? params.mc_version : defaults.mc_version)
     const world_preset = ref(Identifier.parse(params.world_preset))
     const dimension = ref(Identifier.parse(params.dimension))
+    const centerX = ref(parseCoord(params.center_x))
+    const centerZ = ref(parseCoord(params.center_z))
+    const borderSize = ref(parseSize(params.border_size))
     const seed = ref(parseSeed(params.seed))
 
     const datapackStore = useDatapackStore()
@@ -53,9 +59,9 @@ export const useSettingsStore = defineStore('settings', () => {
         EventTracker.track(`change_dev_mode/${new_dev_mode}`)
     })
 
-    watch(seed, (new_seed) => {
-        updateUrlParam('seed', `${new_seed}`)
-    })
+    // watch(seed, (new_seed) => {
+    //     updateUrlParam('seed', `${new_seed}`)
+    // })
 
     datapackStore.$subscribe(async () => {
         if ((await datapackStore.world_presets)?.findIndex((id) => id.equals(world_preset.value)) === -1) {
@@ -81,5 +87,5 @@ export const useSettingsStore = defineStore('settings', () => {
     }
 
 
-    return {mc_version, world_preset, dimension, seed, collator, dev_mode, getLocalizedName}
+    return {mc_version, world_preset, dimension, centerX, centerZ, borderSize, seed, collator, dev_mode, getLocalizedName}
 })

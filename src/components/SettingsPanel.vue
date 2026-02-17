@@ -3,7 +3,7 @@ import { Identifier, XoroshiroRandom } from 'deepslate';
 import { ref } from 'vue';
 import { useDatapackStore } from '../stores/useDatapackStore';
 import { useSettingsStore } from '../stores/useSettingsStore';
-import { parseSeed, versionMetadata } from '../util'
+import { parseCoord, parseSeed, parseSize, versionMetadata } from '../util'
 import { useI18n } from 'vue-i18n';
 
 const i18n = useI18n()
@@ -48,12 +48,36 @@ function randomizeSeed() {
             </select>
         </div>
         <div class="setting">
+            <div class="title full">{{ i18n.t('settings.border.label') }}</div>
+        </div>
+        <div class="setting">
+            <div class="title indent">{{ i18n.t('settings.border.x.label') }}</div>
+            <input :aria-label="i18n.t('settings.border.size.aria-label')"
+                :value="settingsStore.centerX" @change="event => {
+                settingsStore.centerX = parseCoord((event.target as HTMLInputElement).value)
+            }" type="text" />
+        </div>
+        <div class="setting">
+            <div class="title indent">{{ i18n.t('settings.border.z.label') }}</div>
+            <input :aria-label="i18n.t('settings.border.size.aria-label')"
+                :value="settingsStore.centerZ" @change="event => {
+                settingsStore.centerZ = parseCoord((event.target as HTMLInputElement).value)
+            }" type="text" />
+        </div>
+        <div class="setting">
+            <div class="title indent">{{ i18n.t('settings.border.size.label') }}</div>
+            <input :aria-label="i18n.t('settings.border.size.aria-label')"
+                :value="settingsStore.borderSize" @change="event => {
+                settingsStore.borderSize = parseSize((event.target as HTMLInputElement).value)
+            }" type="text" />
+        </div>
+        <div class="setting">
             <div class="title short">{{ i18n.t('settings.seed.label') }}</div>
             <font-awesome-icon icon="fa-dice" class="button" tabindex="0" @click="randomizeSeed"
                 @keypress.enter="randomizeSeed" :title="i18n.t('settings.seed.randomize_button.title')" />
             <input :aria-label="i18n.t('settings.seed.aria-label')" :value="settingsStore.seed" @change="event => {
                 settingsStore.seed = parseSeed((event.target as HTMLInputElement).value)
-            }" type="text" />
+            }" type="password" />
 
         </div>
     </div>
@@ -85,6 +109,15 @@ function randomizeSeed() {
 
 .title.short {
     width: 3.8rem;
+}
+
+.title.full {
+    width: 100%;
+}
+
+.title.indent {
+    padding-left: 1rem;
+    width: 5.3rem;
 }
 
 .button {
